@@ -4,9 +4,18 @@ void main() {
   runApp(const MyApp());
 }
 
+/// O widget MyApp é utilizado no topo da hierarquia de widgets do app.
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
+  /// O método build retorna um MaterialApp com a estrutura do aplicativo. Além
+  /// disso determina as rotas e a rota inicial:
+  ///
+  /// rotas e widgets:
+  /// * / => widget TelaInicial
+  /// * /analisar-precos => widget MyHomePage
+  ///
+  /// A rota inicial é /.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -24,6 +33,9 @@ class MyApp extends StatelessWidget {
   }
 }
 
+/// O widget MyHomePage define a tela que fornece a funcionalidade
+/// de calcular a relação entre os preços do etanol e da gasolina e
+/// indicar com qual dos dois compensa mais abastecer.
 class MyHomePage extends StatefulWidget {
   const MyHomePage({Key? key, required this.title}) : super(key: key);
 
@@ -33,40 +45,82 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
+/// O state MyHomePageState define o state do widget MyHomePage.
 class _MyHomePageState extends State<MyHomePage> {
   final _formKey = GlobalKey<FormState>();
-  double? preco_gasolina;
-  double? preco_etanol;
+  double? precoDaGasolina;
+  double? precoDoEtanol;
 
+  /// Método que calcula a relação entre o preço do etanol e o preço da gasolina.
   double _calcularRelacaoEtanolGasolina() {
-    return preco_etanol! / preco_gasolina!;
+    return precoDoEtanol! / precoDaGasolina!;
   }
 
+  /// Método que retorna uma interface para indicar com qual dos dois
+  /// combustíveis compensa mais abastecer.
   _buildResultado(BuildContext context) {
-    if (preco_etanol != null && preco_gasolina != null) {
+    var estiloDoTexto = Theme.of(context)
+        .textTheme
+        .titleLarge
+        ?.merge(TextStyle(color: Colors.white));
+    if (precoDoEtanol != null && precoDaGasolina != null) {
       double relacao = _calcularRelacaoEtanolGasolina();
+      var texto;
+      var cor;
       if (relacao <= 0.7) {
-        return Text('É melhor abastecer com etanol');
+        texto = Text(
+          'É melhor abastecer com etanol',
+          style: estiloDoTexto,
+        );
+        cor = Colors.green;
       } else {
-        return Text('É melhor abastecer com gasolina');
+        texto = Text(
+          'É melhor abastecer com gasolina',
+          style: estiloDoTexto,
+        );
+        cor = Colors.blueGrey;
       }
+      var caixa = Row(
+        children: [
+          Expanded(
+            child: Container(
+              padding: EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: cor,
+                borderRadius: BorderRadius.all(
+                  Radius.circular(5),
+                ),
+              ),
+              child: Center(
+                child: texto,
+              ),
+            ),
+          ),
+        ],
+      );
+      return caixa;
     } else {
       return Container();
     }
   }
 
+  /// O método build retorna um Scaffold.
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Center(
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
+              Text('Forneça o preço do etanol e da gasolina e, '
+                  'em seguida, pressione o botão CALCULAR.'),
+              SizedBox(
+                height: 30,
+              ),
               Form(
                 key: _formKey,
                 child: Column(
@@ -90,18 +144,9 @@ class _MyHomePageState extends State<MyHomePage> {
                         }
                         return null;
                       },
-                      onChanged: (value) {
-                        if (_formKey.currentState!.validate()) {
-                          _formKey.currentState!.save();
-                        } else {
-                          setState(() {
-                            preco_etanol = null;
-                          });
-                        }
-                      },
                       onSaved: (value) {
                         setState(() {
-                          preco_etanol = double.parse(value!);
+                          precoDoEtanol = double.parse(value!);
                         });
                       },
                     ),
@@ -127,21 +172,54 @@ class _MyHomePageState extends State<MyHomePage> {
                         }
                         return null;
                       },
-                      onChanged: (value) {
-                        if (_formKey.currentState!.validate()) {
-                          _formKey.currentState!.save();
-                        } else {
-                          setState(() {
-                            preco_gasolina = null;
-                          });
-                        }
-                      },
                       onSaved: (value) {
-                        preco_gasolina = double.parse(value!);
+                        setState(() {
+                          precoDaGasolina = double.parse(value!);
+                        });
                       },
                     ),
                     SizedBox(
-                      height: 40,
+                      height: 20,
+                    ),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: () {
+                              if (_formKey.currentState!.validate()) {
+                                _formKey.currentState!.save();
+                              } else {
+                                setState(() {
+                                  precoDoEtanol = null;
+                                  precoDaGasolina = null;
+                                });
+                              }
+                            },
+                            child: const Text('CALCULAR'),
+                            style: ElevatedButton.styleFrom(
+                              minimumSize: const Size.fromHeight(40),
+                            ),
+                          ),
+                        ),
+                        SizedBox(
+                          width: 20,
+                        ),
+                        Expanded(
+                          child: OutlinedButton(
+                            child: Text('LIMPAR'),
+                            onPressed: () {
+                              _formKey.currentState!.reset();
+                              setState(() {
+                                precoDoEtanol = null;
+                                precoDaGasolina = null;
+                              });
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(
+                      height: 20,
                     ),
                     _buildResultado(context),
                   ],
@@ -155,6 +233,8 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
+/// O widget TelaInicial representa a tela inicial do aplicativo. É apresentado
+/// primeiro porque está associado à rota inicial.
 class TelaInicial extends StatefulWidget {
   const TelaInicial({Key? key}) : super(key: key);
 
@@ -162,6 +242,7 @@ class TelaInicial extends StatefulWidget {
   State<TelaInicial> createState() => _TelaInicialState();
 }
 
+/// O state do widget [TelaInicial].
 class _TelaInicialState extends State<TelaInicial> {
   final _formKey = GlobalKey<FormState>();
   String? marca;
@@ -269,6 +350,8 @@ class _TelaInicialState extends State<TelaInicial> {
     );
   }
 
+  /// Este método apresenta um [AlertDialog] para indicar que há
+  /// erros de preenchimento que precisam da atenção do usuário.
   void _showDialog() {
     showDialog(
       context: context,
@@ -318,8 +401,14 @@ class _TelaInicialState extends State<TelaInicial> {
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
                     _formKey.currentState!.save();
+
+                    // Se o form estiver válido, então após salvar o state
+                    // do form, realiza a navegação para a rota [/analisar-precos].
                     Navigator.pushNamed(context, '/analisar-precos');
                   } else {
+                    // Se o form não estiver válido, apresenta a mensagem
+                    // indicando para o usuário preencher os campos
+                    // corretamente.
                     _showDialog();
                   }
                 },
