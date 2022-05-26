@@ -44,18 +44,52 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   _buildResultado(BuildContext context) {
+    var estiloDoTexto = Theme.of(context)
+        .textTheme
+        .titleLarge
+        ?.merge(TextStyle(color: Colors.white));
     if (precoDoEtanol != null && precoDaGasolina != null) {
       double relacao = _calcularRelacaoEtanolGasolina();
+      var texto;
+      var cor;
       if (relacao <= 0.7) {
-        return const Text('É melhor abastecer com etanol');
+        texto = Text(
+          'É melhor abastecer com etanol',
+          style: estiloDoTexto,
+        );
+        cor = Colors.green;
       } else {
-        return const Text('É melhor abastecer com gasolina');
+        texto = Text(
+          'É melhor abastecer com gasolina',
+          style: estiloDoTexto,
+        );
+        cor = Colors.blueGrey;
       }
+      var caixa = Row(
+        children: [
+          Expanded(
+            child: Container(
+              padding: EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: cor,
+                borderRadius: BorderRadius.all(
+                  Radius.circular(5),
+                ),
+              ),
+              child: Center(
+                child: texto,
+              ),
+            ),
+          ),
+        ],
+      );
+      return caixa;
     } else {
       return Container();
     }
   }
 
+  /// Constrói uma UI com informações do veículo
   _buildVeiculoCard() {
     return Card(
       child: ListTile(
@@ -73,7 +107,11 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    // Obtém o veículo a partir dos argumentos da rota.
+    // É necessário fazer cast.
+    // Como já está no início do build(), então não usa setState()
     veiculo = ModalRoute.of(context)!.settings.arguments as Veiculo;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
@@ -93,7 +131,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   child: Column(
                     children: [
                       TextFormField(
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                           prefix: Text('R\$ '),
                           suffix: Text('/litro'),
                           labelText: 'Preço do etanol',
@@ -111,26 +149,17 @@ class _MyHomePageState extends State<MyHomePage> {
                           }
                           return null;
                         },
-                        onChanged: (value) {
-                          if (_formKey.currentState!.validate()) {
-                            _formKey.currentState!.save();
-                          } else {
-                            setState(() {
-                              precoDoEtanol = null;
-                            });
-                          }
-                        },
                         onSaved: (value) {
                           setState(() {
                             precoDoEtanol = double.parse(value!);
                           });
                         },
                       ),
-                      const SizedBox(
+                      SizedBox(
                         height: 20,
                       ),
                       TextFormField(
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                           prefix: Text('R\$ '),
                           suffix: Text('/litro'),
                           labelText: 'Preço da gasolina',
@@ -148,21 +177,54 @@ class _MyHomePageState extends State<MyHomePage> {
                           }
                           return null;
                         },
-                        onChanged: (value) {
-                          if (_formKey.currentState!.validate()) {
-                            _formKey.currentState!.save();
-                          } else {
-                            setState(() {
-                              precoDaGasolina = null;
-                            });
-                          }
-                        },
                         onSaved: (value) {
-                          precoDaGasolina = double.parse(value!);
+                          setState(() {
+                            precoDaGasolina = double.parse(value!);
+                          });
                         },
                       ),
-                      const SizedBox(
-                        height: 40,
+                      SizedBox(
+                        height: 20,
+                      ),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: ElevatedButton(
+                              onPressed: () {
+                                if (_formKey.currentState!.validate()) {
+                                  _formKey.currentState!.save();
+                                } else {
+                                  setState(() {
+                                    precoDoEtanol = null;
+                                    precoDaGasolina = null;
+                                  });
+                                }
+                              },
+                              child: const Text('CALCULAR'),
+                              style: ElevatedButton.styleFrom(
+                                minimumSize: const Size.fromHeight(40),
+                              ),
+                            ),
+                          ),
+                          SizedBox(
+                            width: 20,
+                          ),
+                          Expanded(
+                            child: OutlinedButton(
+                              child: Text('LIMPAR'),
+                              onPressed: () {
+                                _formKey.currentState!.reset();
+                                setState(() {
+                                  precoDoEtanol = null;
+                                  precoDaGasolina = null;
+                                });
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(
+                        height: 20,
                       ),
                       _buildResultado(context),
                     ],
@@ -288,7 +350,7 @@ class _TelaInicialState extends State<TelaInicial> {
     );
   }
 
-  void _showDialog() {
+  void _myShowDialog() {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -337,10 +399,12 @@ class _TelaInicialState extends State<TelaInicial> {
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
                     _formKey.currentState!.save();
+
+                    // Realiza a navegação, passando o argumento (o veículo)
                     Navigator.pushNamed(context, '/analisar-precos',
                         arguments: veiculo);
                   } else {
-                    _showDialog();
+                    _myShowDialog();
                   }
                 },
                 child: const Text('PROSSEGUIR'),
@@ -356,13 +420,20 @@ class _TelaInicialState extends State<TelaInicial> {
   }
 }
 
+/// A classe Veículo contém os atributos:
+/// * marca
+/// * modelo
+/// * ano
+/// * volume do tanque
 class Veiculo {
   String marca;
   String modelo;
   int ano;
   int volumeDoTanque;
 
+  /// O construtor com parâmetros posicionais
   Veiculo(this.marca, this.modelo, this.ano, this.volumeDoTanque);
 
+  /// Define um construtor nomeado para inicializar os atributos com valores "vazios".
   Veiculo.vazio() : this('', '', 0, 0);
 }
