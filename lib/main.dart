@@ -352,7 +352,7 @@ class _TelaInicialState extends State<TelaInicial> {
 
   /// Este método apresenta um [AlertDialog] para indicar que há
   /// erros de preenchimento que precisam da atenção do usuário.
-  void _showDialog() {
+  void _myShowDialog() {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -409,7 +409,7 @@ class _TelaInicialState extends State<TelaInicial> {
                     // Se o form não estiver válido, apresenta a mensagem
                     // indicando para o usuário preencher os campos
                     // corretamente.
-                    _showDialog();
+                    _myShowDialog();
                   }
                 },
                 child: Text('PROSSEGUIR'),
