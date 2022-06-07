@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import "dart:convert";
 
 void main() {
   runApp(const MyApp());
@@ -26,12 +27,42 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      initialRoute: '/',
+      initialRoute: '/splash',
       routes: {
         '/': (context) => const TelaInicial(),
+        '/splash': (context) => const TelaSplash(),
         '/escolher-posto': (context) => TelaEscolherPosto(),
         '/analisar-precos': (context) => const MyHomePage()
       },
+    );
+  }
+}
+
+class TelaSplash extends StatelessWidget {
+  const TelaSplash({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(color: Colors.white),
+      padding: EdgeInsets.all(40),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Image(
+            image: AssetImage('assets/graphics/logotipo.png'),
+          ),
+          SizedBox(
+            height: 20,
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pushReplacementNamed(context, "/");
+            },
+            child: Text('PROSSEGUIR'),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -426,6 +457,7 @@ class _TelaInicialState extends State<TelaInicial> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Informe os dados do veículo'),
+        automaticallyImplyLeading: false,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -468,6 +500,17 @@ class _TelaInicialState extends State<TelaInicial> {
   }
 }
 
+/// O widget [TelaEscolherPosto] representa uma interface que permite
+/// ao usuário escolher um posto de combustível dentre uma lista de opções
+/// disponíveis.
+///
+/// As opções da lista (os postos de combustíveis) são obtidas a partir de
+/// um arquivo json (`postos-de-combustivel.json`) que está nos assets
+/// do aplicativo.
+///
+/// Como a forma de carregar os dados do arquivo é assíncrona, o código
+/// deste widget utiliza um [FutureBuilder] para executar um código
+/// quando os dados forem devidamente carregados pelo [DefaultAssetBundle].
 class TelaEscolherPosto extends StatelessWidget {
   TelaEscolherPosto({Key? key}) : super(key: key);
 
@@ -480,204 +523,53 @@ class TelaEscolherPosto extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Escolha o posto de combustível'),
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(8),
-        children: [
-          ListTile(
-            title: Text('AUTO POSTO LEAL E LEAL LTDA'),
-            subtitle: Text('506 NORTE AVENIDA NS 8, S/N'),
-            onTap: () {
-              Navigator.pushNamed(
-                context,
-                '/analisar-precos',
-                arguments: MyHomePageRouteParams(
-                  veiculo: veiculo,
-                  posto: PostoDeCombustivel(
-                    razaoSocial: 'AUTO POSTO LEAL E LEAL LTDA',
-                  ),
-                ),
-              );
-            },
-          ),
-          ListTile(
-            title: Text('AUTO POSTO MASP ARNE LTDA'),
-            subtitle: Text('QUADRA 406 NORTE AVENIDA NS 6 - P.A.C., S/N'),
-            onTap: () {
-              Navigator.pushNamed(
-                context,
-                '/analisar-precos',
-                arguments: MyHomePageRouteParams(
-                  veiculo: veiculo,
-                  posto: PostoDeCombustivel(
-                    razaoSocial: 'AUTO POSTO MASP ARNE LTDA',
-                  ),
-                ),
-              );
-            },
-          ),
-          ListTile(
-            title: Text('PETROSHOP - COM. DE COMBUSTIVEIS LTDA - ME.'),
-            subtitle:
-                Text('Q 412 NORTE, ROD. TO-010, (ASRNE55, CONJ. PAC-02),  S/N'),
-            onTap: () {
-              Navigator.pushNamed(
-                context,
-                '/analisar-precos',
-                arguments: MyHomePageRouteParams(
-                  veiculo: veiculo,
-                  posto: PostoDeCombustivel(
-                    razaoSocial: 'PETROSHOP - COM. DE COMBUSTIVEIS LTDA - ME.',
-                  ),
-                ),
-              );
-            },
-          ),
-          ListTile(
-            title: Text('RIBEIRO COMERCIO VAREJISTA DE COMBUSTIVEIS LTDA'),
-            subtitle: Text('QUADRA 406 NORTE AVENIDA NS 6 - P.A.C., S/N'),
-            onTap: () {
-              Navigator.pushNamed(
-                context,
-                '/analisar-precos',
-                arguments: MyHomePageRouteParams(
-                  veiculo: veiculo,
-                  posto: PostoDeCombustivel(
-                    razaoSocial:
-                        'RIBEIRO COMERCIO VAREJISTA DE COMBUSTIVEIS LTDA',
-                  ),
-                ),
-              );
-            },
-          ),
-          ListTile(
-            title: Text('POSTO DE COMBUSTIVEIS 32 LTDA'),
-            subtitle: Text('QUADRA 305 NORTE AV. NS 05 PAC LOTE 01,  SN'),
-            onTap: () {
-              Navigator.pushNamed(
-                context,
-                '/analisar-precos',
-                arguments: MyHomePageRouteParams(
-                  veiculo: veiculo,
-                  posto: PostoDeCombustivel(
-                    razaoSocial: 'POSTO DE COMBUSTIVEIS 32 LTDA',
-                  ),
-                ),
-              );
-            },
-          ),
-          ListTile(
-            title: Text('AUTO POSTO SHALOM LTDA'),
-            subtitle: Text('QUADRA ARNE 51 AVENIDA NS 02,  S/N'),
-            onTap: () {
-              Navigator.pushNamed(
-                context,
-                '/analisar-precos',
-                arguments: MyHomePageRouteParams(
-                  veiculo: veiculo,
-                  posto: PostoDeCombustivel(
-                    razaoSocial: 'AUTO POSTO SHALOM LTDA',
-                  ),
-                ),
-              );
-            },
-          ),
-          ListTile(
-            title: Text('PETRO - POSTOS DE ABASTECIMENTO LTDA.'),
-            subtitle: Text('AVENIDA NS - 1,  S/N'),
-            onTap: () {
-              Navigator.pushNamed(
-                context,
-                '/analisar-precos',
-                arguments: MyHomePageRouteParams(
-                  veiculo: veiculo,
-                  posto: PostoDeCombustivel(
-                    razaoSocial: 'PETRO - POSTOS DE ABASTECIMENTO LTDA.',
-                  ),
-                ),
-              );
-            },
-          ),
-          ListTile(
-            title: Text('STAR COMERCIO DE COMBUSTIVEL LTDA'),
-            subtitle: Text('AVENIDA NS 02 ARSE 61,  SN'),
-            onTap: () {
-              Navigator.pushNamed(
-                context,
-                '/analisar-precos',
-                arguments: MyHomePageRouteParams(
-                  veiculo: veiculo,
-                  posto: PostoDeCombustivel(
-                    razaoSocial: 'STAR COMERCIO DE COMBUSTIVEL LTDA',
-                  ),
-                ),
-              );
-            },
-          ),
-          ListTile(
-            title: Text('SOUZA & VITAL LTDA'),
-            subtitle: Text('QUADRA 206 SUL AV. NS 04 PAC LOTE 13-A,  SN'),
-            onTap: () {
-              Navigator.pushNamed(
-                context,
-                '/analisar-precos',
-                arguments: MyHomePageRouteParams(
-                  veiculo: veiculo,
-                  posto: PostoDeCombustivel(
-                    razaoSocial: 'SOUZA & VITAL LTDA',
-                  ),
-                ),
-              );
-            },
-          ),
-          ListTile(
-            title: Text('AUTO POSTO DISBRAVA LTDA'),
-            subtitle: Text('QUADRA QD 405  NORTE  ALAMEDA 07  QC 05,  01B'),
-            onTap: () {
-              Navigator.pushNamed(
-                context,
-                '/analisar-precos',
-                arguments: MyHomePageRouteParams(
-                  veiculo: veiculo,
-                  posto: PostoDeCombustivel(
-                    razaoSocial: 'AUTO POSTO DISBRAVA LTDA',
-                  ),
-                ),
-              );
-            },
-          ),
-          ListTile(
-            title: Text('AUTO POSTO G2 LTDA'),
-            subtitle: Text('QUADRA 101 NORTE AVENIDA NS 1,  1'),
-            onTap: () {
-              Navigator.pushNamed(
-                context,
-                '/analisar-precos',
-                arguments: MyHomePageRouteParams(
-                  veiculo: veiculo,
-                  posto: PostoDeCombustivel(
-                    razaoSocial: 'AUTO POSTO G2 LTDA',
-                  ),
-                ),
-              );
-            },
-          ),
-          ListTile(
-            title: Text('ALCANTARA & FARIA LTDA'),
-            subtitle: Text('QUADRA 712 SUL, QI 08, LOTE 01 PAC 01,  S/N'),
-            onTap: () {
-              Navigator.pushNamed(
-                context,
-                '/analisar-precos',
-                arguments: MyHomePageRouteParams(
-                  veiculo: veiculo,
-                  posto: PostoDeCombustivel(
-                    razaoSocial: 'ALCANTARA & FARIA LTDA',
-                  ),
-                ),
-              );
-            },
-          ),
-        ],
+      body: FutureBuilder(
+        future: DefaultAssetBundle.of(context)
+            .loadString('assets/dados/postos-de-combustivel.json'),
+        builder: (context, snapshot) {
+          // o objeto snapshot permite saber se a future já terminou
+          // de executar (tem dados ou não).
+          // se tiver dados, então constroi o ListView, caso contrário
+          // apresenta um CircularProgressIndicator
+          if (snapshot.hasData) {
+            // utiliza o método decode para converter a string que
+            // contém o conteúdo do arquivo para o formato json
+            var dados = json.decode(snapshot.data.toString());
+
+            // converte os dados para uma lista de PostoDeCombustivel
+            var postos = <PostoDeCombustivel>[];
+            dados.forEach((dado) {
+              postos.add(PostoDeCombustivel.fromJson(dado));
+            });
+
+            // constroi e retorna o ListView utilizando o construtor builder,
+            // que tem o parâmetro itemCount (tem o tamanho da lista postos)
+            // e index, que está associado a cada índice da lista postos
+            return ListView.builder(
+              itemCount: postos.length,
+              itemBuilder: (BuildContext context, int index) {
+                return ListTile(
+                  title: Text(postos[index].razaoSocial!),
+                  subtitle: Text(postos[index].endereco!),
+                  onTap: () {
+                    Navigator.pushNamed(
+                      context,
+                      '/analisar-precos',
+                      arguments: MyHomePageRouteParams(
+                        veiculo: veiculo,
+                        posto: postos[index],
+                      ),
+                    );
+                  },
+                );
+              },
+            );
+          } else {
+            return Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+        },
       ),
     );
   }
@@ -716,6 +608,17 @@ class PostoDeCombustivel {
   /// que o parâmetro [razaoSocial] é obrigatório. Os demais parâmetros são opcionais.
   PostoDeCombustivel(
       {required this.razaoSocial, this.cnpj, this.endereco, this.bandeira});
+
+  /// Construtor de [PostoDeCombustivel] que é utilizado para converter
+  /// um mapa em que as chaves são string e os valores são dynamic. Geralmente
+  /// essa representação é adotada quando os dados de um json são carregados.
+  PostoDeCombustivel.fromJson(Map<String, dynamic> json)
+      : this(
+          razaoSocial: json['RAZAOSOCIAL'],
+          cnpj: json["CNPJ"].toString(),
+          endereco: json["ENDERECO"],
+          bandeira: json["BANDEIRA"],
+        );
 }
 
 /// Define uma classe para representar os dados de rota para a tela [MyHomePage]:
