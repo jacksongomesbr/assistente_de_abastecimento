@@ -1,7 +1,14 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import "dart:convert";
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(const MyApp());
 }
 
@@ -515,6 +522,8 @@ class TelaEscolherPosto extends StatelessWidget {
   TelaEscolherPosto({Key? key}) : super(key: key);
 
   Veiculo veiculo = Veiculo.vazio();
+  final CollectionReference _postos =
+      FirebaseFirestore.instance.collection('postos');
 
   @override
   Widget build(BuildContext context) {
@@ -523,41 +532,34 @@ class TelaEscolherPosto extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Escolha o posto de combustível'),
       ),
-      body: FutureBuilder(
-        future: DefaultAssetBundle.of(context)
-            .loadString('assets/dados/postos-de-combustivel.json'),
-        builder: (context, snapshot) {
+      body: StreamBuilder(
+        stream: _postos.snapshots(),
+        builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
           // o objeto snapshot permite saber se a future já terminou
           // de executar (tem dados ou não).
           // se tiver dados, então constroi o ListView, caso contrário
           // apresenta um CircularProgressIndicator
           if (snapshot.hasData) {
-            // utiliza o método decode para converter a string que
-            // contém o conteúdo do arquivo para o formato json
-            var dados = json.decode(snapshot.data.toString());
-
-            // converte os dados para uma lista de PostoDeCombustivel
-            var postos = <PostoDeCombustivel>[];
-            dados.forEach((dado) {
-              postos.add(PostoDeCombustivel.fromJson(dado));
-            });
-
             // constroi e retorna o ListView utilizando o construtor builder,
             // que tem o parâmetro itemCount (tem o tamanho da lista postos)
             // e index, que está associado a cada índice da lista postos
             return ListView.builder(
-              itemCount: postos.length,
+              itemCount: snapshot.data!.docs.length,
               itemBuilder: (BuildContext context, int index) {
+                final DocumentSnapshot documentSnapshot =
+                    snapshot.data!.docs[index];
+                final PostoDeCombustivel posto =
+                    PostoDeCombustivel.fromDocument(documentSnapshot);
                 return ListTile(
-                  title: Text(postos[index].razaoSocial!),
-                  subtitle: Text(postos[index].endereco!),
+                  title: Text(posto.razaoSocial!),
+                  subtitle: Text(posto.endereco!),
                   onTap: () {
                     Navigator.pushNamed(
                       context,
                       '/analisar-precos',
                       arguments: MyHomePageRouteParams(
                         veiculo: veiculo,
-                        posto: postos[index],
+                        posto: posto,
                       ),
                     );
                   },
@@ -599,6 +601,7 @@ class Veiculo {
 /// * endereço
 /// * bandeira
 class PostoDeCombustivel {
+  String id;
   String? razaoSocial;
   String? cnpj;
   String? endereco;
@@ -607,17 +610,32 @@ class PostoDeCombustivel {
   /// Construtor de [PostoDeCombustivel] utiliza abordagem de parâmetros nomeados e indica
   /// que o parâmetro [razaoSocial] é obrigatório. Os demais parâmetros são opcionais.
   PostoDeCombustivel(
-      {required this.razaoSocial, this.cnpj, this.endereco, this.bandeira});
+      {required this.id,
+      required this.razaoSocial,
+      this.cnpj,
+      this.endereco,
+      this.bandeira});
 
   /// Construtor de [PostoDeCombustivel] que é utilizado para converter
   /// um mapa em que as chaves são string e os valores são dynamic. Geralmente
   /// essa representação é adotada quando os dados de um json são carregados.
   PostoDeCombustivel.fromJson(Map<String, dynamic> json)
       : this(
+          id: json["CODIGOISIMP"].toString(),
           razaoSocial: json['RAZAOSOCIAL'],
           cnpj: json["CNPJ"].toString(),
           endereco: json["ENDERECO"],
           bandeira: json["BANDEIRA"],
+        );
+
+  /// Construtor de [PostoDeComsutivel] a partir de um [DocumentSnapshot].
+  PostoDeCombustivel.fromDocument(DocumentSnapshot document)
+      : this(
+          id: document.id,
+          razaoSocial: document["razao_social"],
+          cnpj: document["cnpj"],
+          endereco: document["endereco"],
+          bandeira: document["bandeira"],
         );
 }
 
