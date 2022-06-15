@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
-import '../models/home_page_route_params.dart';
+import '../models/posto_veiculo_route_params.dart';
 import '../models/posto_de_combustivel.dart';
 import '../models/veiculo.dart';
 
@@ -55,7 +55,7 @@ class TelaEscolherPosto extends StatelessWidget {
                     Navigator.pushNamed(
                       context,
                       '/analisar-precos',
-                      arguments: MyHomePageRouteParams(
+                      arguments: PostoVeiculoRouteParams(
                         veiculo: veiculo,
                         posto: posto,
                       ),

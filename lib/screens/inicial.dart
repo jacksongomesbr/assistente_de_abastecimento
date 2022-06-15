@@ -1,4 +1,6 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 import '../models/veiculo.dart';
 
@@ -12,6 +14,7 @@ class TelaInicial extends StatefulWidget {
 class _TelaInicialState extends State<TelaInicial> {
   final _formKey = GlobalKey<FormState>();
   Veiculo veiculo = Veiculo.vazio();
+  User? _user;
 
   /// Retorna o formulário dos dados do veículo.
   /// O formulário contém os campos:
@@ -113,7 +116,44 @@ class _TelaInicialState extends State<TelaInicial> {
     );
   }
 
-  void _showDialog() {
+  /// Apresenta um card com as informações do usuário
+  _buildUserCard() {
+    return Card(
+      child: ListTile(
+        leading: CircleAvatar(
+          backgroundColor: Colors.lightBlueAccent,
+          foregroundColor: Colors.white,
+          child: _user?.photoURL != null
+              ? ClipOval(
+                  child: Material(
+                    child: Image.network(
+                      _user?.photoURL ?? '',
+                      fit: BoxFit.fitHeight,
+                    ),
+                  ),
+                )
+              : const ClipOval(
+                  child: Material(
+                    color: Colors.grey,
+                    child: Padding(
+                      padding: EdgeInsets.all(16.0),
+                      child: Icon(
+                        Icons.person,
+                        size: 60,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+        ),
+        title: Text(_user?.displayName ?? ''),
+        subtitle: Text(_user?.email ?? ''),
+      ),
+    );
+  }
+
+  /// Apresenta um dialog com erros do preenchimento do formulário
+  void _showDialogErros() {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -134,50 +174,104 @@ class _TelaInicialState extends State<TelaInicial> {
     );
   }
 
+  /// Trata o clique no botão para sair do app
+  void _handleConfirmarSaida() async {
+    final sair = await showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Confirmar saída'),
+          content: const Text('Tem certeza que deseja sair do app agora?'),
+          actions: [
+            TextButton(
+              child: const Text("NÃO"),
+              onPressed: () {
+                return Navigator.of(context).pop(false);
+              },
+            ),
+            TextButton(
+              child: const Text("SIM"),
+              onPressed: () {
+                return Navigator.of(context).pop(true);
+              },
+            )
+          ],
+        );
+      },
+    );
+    if (sair) {
+      await GoogleSignIn().signOut();
+      await FirebaseAuth.instance.signOut();
+      if (!mounted) return;
+      Navigator.of(context).pushReplacementNamed('/splash');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Informe os dados do veículo'),
-        automaticallyImplyLeading: false,
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            Container(
-              padding: const EdgeInsets.fromLTRB(0, 16, 0, 16),
-              child: const Text('Informe os dados do veículo e '
-                  'depois pressione PROSSEGUIR '
-                  'para avançar para a próxima tela'),
-            ),
-            const SizedBox(
-              height: 10,
-            ),
-            _buildForm(context),
-            const SizedBox(
-              height: 30,
-            ),
-            Center(
-              child: ElevatedButton(
-                onPressed: () {
-                  if (_formKey.currentState!.validate()) {
-                    _formKey.currentState!.save();
-                    Navigator.pushNamed(context, '/escolher-posto',
-                        arguments: veiculo);
-                  } else {
-                    _showDialog();
-                  }
-                },
-                child: const Text('PROSSEGUIR'),
-                style: ElevatedButton.styleFrom(
-                  minimumSize: const Size.fromHeight(40),
+    return StreamBuilder(
+        stream: FirebaseAuth.instance.authStateChanges(),
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            _user = FirebaseAuth.instance.currentUser;
+            return Scaffold(
+              appBar: AppBar(
+                title: const Text('Informe os dados do veículo'),
+                automaticallyImplyLeading: false,
+                actions: [
+                  IconButton(
+                    onPressed: _user != null ? _handleConfirmarSaida : null,
+                    icon: const Icon(Icons.exit_to_app),
+                  ),
+                ],
+              ),
+              body: SingleChildScrollView(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  children: [
+                    _buildUserCard(),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    Container(
+                      padding: const EdgeInsets.fromLTRB(0, 16, 0, 16),
+                      child: const Text('Informe os dados do veículo e '
+                          'depois pressione PROSSEGUIR '
+                          'para avançar para a próxima tela'),
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    _buildForm(context),
+                    const SizedBox(
+                      height: 30,
+                    ),
+                    Center(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          if (_formKey.currentState!.validate()) {
+                            _formKey.currentState!.save();
+                            Navigator.pushNamed(context, '/escolher-posto',
+                                arguments: veiculo);
+                          } else {
+                            _showDialogErros();
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          minimumSize: const Size.fromHeight(40),
+                        ),
+                        child: const Text('PROSSEGUIR'),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ),
-          ],
-        ),
-      ),
-    );
+            );
+          } else {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+        });
   }
 }

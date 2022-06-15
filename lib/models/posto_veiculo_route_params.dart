@@ -4,9 +4,9 @@ import 'veiculo.dart';
 /// Define uma classe para representar os dados de rota para a tela [MyHomePage]:
 /// * posto de combustível
 /// * veículo
-class MyHomePageRouteParams {
+class PostoVeiculoRouteParams {
   PostoDeCombustivel? posto;
   Veiculo? veiculo;
 
-  MyHomePageRouteParams({this.posto, this.veiculo});
+  PostoVeiculoRouteParams({this.posto, this.veiculo});
 }

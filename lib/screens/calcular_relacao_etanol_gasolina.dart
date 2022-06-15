@@ -1,26 +1,26 @@
 import 'package:flutter/material.dart';
 
-import '../models/home_page_route_params.dart';
+import '../models/posto_veiculo_route_params.dart';
 import '../models/posto_de_combustivel.dart';
 import '../models/veiculo.dart';
 
-/// A classe [MyHomePage] fornece a tela que entre a funcionalidade
+/// A classe [TelaCalcularRelacaoEtanolGasolina] fornece a tela que entre a funcionalidade
 /// de calcular a relação entre o preço do etanol e da gasolina, além
 /// de indicar, com base nesta relação, com qual dos dois tipos de
 /// combustível compensa mais realizar o abastecimento.
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key}) : super(key: key);
+class TelaCalcularRelacaoEtanolGasolina extends StatefulWidget {
+  const TelaCalcularRelacaoEtanolGasolina({Key? key}) : super(key: key);
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<TelaCalcularRelacaoEtanolGasolina> createState() => _TelaCalcularRelacaoEtanolGasolinaState();
 }
 
-/// A classe [MyHomePageState] representa o state de [MyHomePage].
+/// A classe [MyHomePageState] representa o state de [TelaCalcularRelacaoEtanolGasolina].
 ///
 /// Mais especificamente, os campos que podem alterar o state são:
 /// * [precoDaGasolina]
 /// * [precoDoEtanol]
-class _MyHomePageState extends State<MyHomePage> {
+class _TelaCalcularRelacaoEtanolGasolinaState extends State<TelaCalcularRelacaoEtanolGasolina> {
   final _formKey = GlobalKey<FormState>();
   double? precoDaGasolina;
   double? precoDoEtanol;
@@ -123,14 +123,14 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    MyHomePageRouteParams params =
-        ModalRoute.of(context)!.settings.arguments as MyHomePageRouteParams;
+    PostoVeiculoRouteParams params =
+        ModalRoute.of(context)!.settings.arguments as PostoVeiculoRouteParams;
     veiculo = params.veiculo;
     posto = params.posto;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Assistente de abastecimento'),
+        title: const Text('Assistente de abastecimento'),
       ),
       body: SingleChildScrollView(
         child: Padding(
