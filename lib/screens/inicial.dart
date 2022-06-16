@@ -1,3 +1,4 @@
+import 'package:assistente_de_abastecimento/components/drawer_menu.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -116,42 +117,6 @@ class _TelaInicialState extends State<TelaInicial> {
     );
   }
 
-  /// Apresenta um card com as informações do usuário
-  _buildUserCard() {
-    return Card(
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: Colors.lightBlueAccent,
-          foregroundColor: Colors.white,
-          child: _user?.photoURL != null
-              ? ClipOval(
-                  child: Material(
-                    child: Image.network(
-                      _user?.photoURL ?? '',
-                      fit: BoxFit.fitHeight,
-                    ),
-                  ),
-                )
-              : const ClipOval(
-                  child: Material(
-                    color: Colors.grey,
-                    child: Padding(
-                      padding: EdgeInsets.all(16.0),
-                      child: Icon(
-                        Icons.person,
-                        size: 60,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ),
-        ),
-        title: Text(_user?.displayName ?? ''),
-        subtitle: Text(_user?.email ?? ''),
-      ),
-    );
-  }
-
   /// Apresenta um dialog com erros do preenchimento do formulário
   void _showDialogErros() {
     showDialog(
@@ -217,7 +182,6 @@ class _TelaInicialState extends State<TelaInicial> {
             return Scaffold(
               appBar: AppBar(
                 title: const Text('Informe os dados do veículo'),
-                automaticallyImplyLeading: false,
                 actions: [
                   IconButton(
                     onPressed: _user != null ? _handleConfirmarSaida : null,
@@ -225,11 +189,11 @@ class _TelaInicialState extends State<TelaInicial> {
                   ),
                 ],
               ),
+              drawer: MenuDrawer(),
               body: SingleChildScrollView(
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   children: [
-                    _buildUserCard(),
                     const SizedBox(
                       height: 10,
                     ),
