@@ -63,7 +63,7 @@ class _TelaSplashState extends State<TelaSplash> {
             onPressed: () async {
               await signInWithGoogle();
               if (!mounted) return;
-              Navigator.of(context).pushReplacementNamed("/");
+              Navigator.of(context).pushReplacementNamed("/veiculos");
             },
             child: Text('ENTRAR COM GOOGLE'),
           ),

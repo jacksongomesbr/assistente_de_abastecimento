@@ -12,7 +12,8 @@ class TelaCalcularRelacaoEtanolGasolina extends StatefulWidget {
   const TelaCalcularRelacaoEtanolGasolina({Key? key}) : super(key: key);
 
   @override
-  State<TelaCalcularRelacaoEtanolGasolina> createState() => _TelaCalcularRelacaoEtanolGasolinaState();
+  State<TelaCalcularRelacaoEtanolGasolina> createState() =>
+      _TelaCalcularRelacaoEtanolGasolinaState();
 }
 
 /// A classe [MyHomePageState] representa o state de [TelaCalcularRelacaoEtanolGasolina].
@@ -20,7 +21,8 @@ class TelaCalcularRelacaoEtanolGasolina extends StatefulWidget {
 /// Mais especificamente, os campos que podem alterar o state são:
 /// * [precoDaGasolina]
 /// * [precoDoEtanol]
-class _TelaCalcularRelacaoEtanolGasolinaState extends State<TelaCalcularRelacaoEtanolGasolina> {
+class _TelaCalcularRelacaoEtanolGasolinaState
+    extends State<TelaCalcularRelacaoEtanolGasolina> {
   final _formKey = GlobalKey<FormState>();
   double? precoDaGasolina;
   double? precoDoEtanol;
@@ -32,6 +34,14 @@ class _TelaCalcularRelacaoEtanolGasolinaState extends State<TelaCalcularRelacaoE
   /// e o preço da gasolina
   double _calcularRelacaoEtanolGasolina() {
     return precoDoEtanol! / precoDaGasolina!;
+  }
+
+  double _calcularPrecoComEtanol() {
+    return precoDoEtanol! * (veiculo?.volumeDoTanque ?? 0);
+  }
+
+  double _calcularPrecoComGasolina() {
+    return precoDaGasolina! * (veiculo?.volumeDoTanque ?? 0);
   }
 
   /// O método [buildResultado] é responsável por gerar a apresentação
@@ -70,8 +80,64 @@ class _TelaCalcularRelacaoEtanolGasolinaState extends State<TelaCalcularRelacaoE
                   Radius.circular(5),
                 ),
               ),
-              child: Center(
-                child: texto,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: texto,
+                    flex: 6,
+                  ),
+                  Expanded(
+                    child: SizedBox(),
+                    flex: 1,
+                  ),
+                  Expanded(
+                    flex: 3,
+                    child: Column(
+                      children: [
+                        Text(
+                          "R\$ ${_calcularPrecoComEtanol().toStringAsFixed(2)}",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          "Com etanol",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Colors.white60,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Expanded(
+                    child: Container(),
+                    flex: 1,
+                  ),
+                  Expanded(
+                    flex: 3,
+                    child: Column(
+                      children: [
+                        Text(
+                          "R\$ ${_calcularPrecoComGasolina().toStringAsFixed(2)}",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          "Com gasolina",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Colors.white60,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ),
           ),

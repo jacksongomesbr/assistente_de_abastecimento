@@ -115,20 +115,7 @@ class _MenuDrawerState extends State<MenuDrawer> {
                 title: const Text('Meus veículos'),
                 leading: const Icon(Icons.car_rental),
                 onTap: () {
-                  // Update the state of the app
-                  // ...
-                  // Then close the drawer
-                  Navigator.pop(context);
-                },
-              ),
-              ListTile(
-                title: const Text('Postos de combustível'),
-                leading: const Icon(Icons.business),
-                onTap: () {
-                  // Update the state of the app
-                  // ...
-                  // Then close the drawer
-                  Navigator.pop(context);
+                  Navigator.of(context).pushNamed("/veiculos");
                 },
               ),
               Expanded(child: Container()),
